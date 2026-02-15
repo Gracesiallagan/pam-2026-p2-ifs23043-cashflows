@@ -9,24 +9,23 @@ fun Application.configureRouting() {
 
     routing {
 
-        // =============================
-        // ROOT (optional, biar tidak 404)
-        // =============================
+        // Root (optional)
         get("/") {
             call.respondText("Cash Flow API is running")
         }
 
-        // =============================
-        // SETUP DATA (WAJIB POST)
-        // =============================
-        post("/setup") {
-            AppModule.cashFlowController.setupData(call)
-        }
-
-        // =============================
-        // CASH FLOW ROUTES
-        // =============================
         route("/cash-flows") {
+
+            // =============================
+            // SETUP DATA (HARUS DI SINI)
+            // =============================
+            post("/setup") {
+                AppModule.cashFlowController.setupData(call)
+            }
+
+            // =============================
+            // CRUD
+            // =============================
 
             // ambil semua data
             get {
