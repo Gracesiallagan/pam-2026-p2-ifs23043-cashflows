@@ -3,10 +3,9 @@ package org.delcom.controllers
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
-import org.delcom.data.CashFlowQuery
-import org.delcom.data.CashFlowRequest
-import org.delcom.data.DataResponse
+import org.delcom.data.*
 import org.delcom.entities.CashFlow
+import org.delcom.helpers.ValidatorHelper
 import org.delcom.helpers.loadInitialData
 import org.delcom.services.ICashFlowService
 import java.time.Instant
@@ -84,11 +83,10 @@ class CashFlowController(
     suspend fun getById(call: ApplicationCall) {
 
         val id = call.parameters["id"]
-            ?: return call.respond(
-                DataResponse("error", "Id tidak ditemukan", null)
-            )
+            ?: throw AppException("Id tidak ditemukan")
 
         val result = cashFlowService.getCashFlowById(id)
+            ?: throw AppException("Data tidak ditemukan")
 
         call.respond(
             DataResponse(
@@ -105,6 +103,9 @@ class CashFlowController(
     suspend fun create(call: ApplicationCall) {
 
         val body = call.receive<CashFlowRequest>()
+
+        // ✅ VALIDATION
+        ValidatorHelper.validate(body)
 
         val id = UUID.randomUUID().toString()
         val now = Instant.now().toString()
@@ -135,22 +136,25 @@ class CashFlowController(
     suspend fun update(call: ApplicationCall) {
 
         val id = call.parameters["id"]
-            ?: return call.respond(
-                DataResponse("error", "Id tidak ditemukan", null)
-            )
+            ?: throw AppException("Id tidak ditemukan")
 
         val body = call.receive<CashFlowRequest>()
+
+        // ✅ VALIDATION
+        ValidatorHelper.validate(body)
+
+        val existing = cashFlowService.getCashFlowById(id)
+            ?: throw AppException("Data tidak ditemukan")
+
         val now = Instant.now().toString()
 
-        val updated = CashFlow(
-            id,
-            body.type,
-            body.source,
-            body.label,
-            body.amount.toInt(),
-            body.description,
-            now,
-            now
+        val updated = existing.copy(
+            type = body.type,
+            source = body.source,
+            label = body.label,
+            amount = body.amount.toInt(),
+            description = body.description,
+            updatedAt = now
         )
 
         cashFlowService.updateCashFlow(id, updated)
@@ -170,9 +174,10 @@ class CashFlowController(
     suspend fun delete(call: ApplicationCall) {
 
         val id = call.parameters["id"]
-            ?: return call.respond(
-                DataResponse("error", "Id tidak ditemukan", null)
-            )
+            ?: throw AppException("Id tidak ditemukan")
+
+        val existing = cashFlowService.getCashFlowById(id)
+            ?: throw AppException("Data tidak ditemukan")
 
         cashFlowService.removeCashFlow(id)
 
@@ -192,6 +197,7 @@ class CashFlowController(
         val data = cashFlowService.getAllCashFlows(CashFlowQuery())
             .map { it.type }
             .distinct()
+            .sorted()
 
         call.respond(DataResponse("success", "List types", data))
     }
@@ -200,6 +206,7 @@ class CashFlowController(
         val data = cashFlowService.getAllCashFlows(CashFlowQuery())
             .map { it.source }
             .distinct()
+            .sorted()
 
         call.respond(DataResponse("success", "List sources", data))
     }
@@ -209,6 +216,7 @@ class CashFlowController(
             .flatMap { it.label.split(",") }
             .map { it.trim() }
             .distinct()
+            .sorted()
 
         call.respond(DataResponse("success", "List labels", data))
     }

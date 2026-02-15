@@ -1,18 +1,32 @@
 package org.delcom
 
 import io.ktor.server.application.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.delcom.data.AppModule
 
 fun Application.configureRouting() {
+
     routing {
 
-        route("/cash-flows") {
+        // =============================
+        // ROOT (biar tidak 404)
+        // =============================
+        get("/") {
+            call.respondText("Cash Flow API is running")
+        }
 
-            // setup data awal
-            post("/setup") {
-                AppModule.cashFlowController.setupData(call)
-            }
+        // =============================
+        // SETUP DATA (BISA DIBUKA DARI BROWSER)
+        // =============================
+        get("/setup") {
+            AppModule.cashFlowController.setupData(call)
+        }
+
+        // =============================
+        // CASH FLOW ROUTES
+        // =============================
+        route("/cash-flows") {
 
             // ambil semua data
             get {
@@ -29,15 +43,19 @@ fun Application.configureRouting() {
                 AppModule.cashFlowController.create(call)
             }
 
-            // update
+            // update data
             put("/{id}") {
                 AppModule.cashFlowController.update(call)
             }
 
-            // delete
+            // hapus data
             delete("/{id}") {
                 AppModule.cashFlowController.delete(call)
             }
+
+            // =============================
+            // EXTENDS
+            // =============================
             get("/types") {
                 AppModule.cashFlowController.getTypes(call)
             }

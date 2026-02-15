@@ -11,17 +11,31 @@ class CashFlowRepository : ICashFlowRepository {
         return cashFlows.filter {
 
             (query.type == null || it.type.equals(query.type, true)) &&
+
                     (query.source == null || it.source.equals(query.source, true)) &&
+
                     (query.search == null || it.description.contains(query.search, true)) &&
+
                     (query.gteAmount == null || it.amount >= query.gteAmount) &&
+
                     (query.lteAmount == null || it.amount <= query.lteAmount) &&
+                    (query.startDate == null || it.createdAt >= query.startDate) &&
+
+                    (query.endDate == null || it.createdAt <= query.endDate) &&
+
                     (query.labels == null ||
-                            query.labels.split(",").any { label ->
-                                it.label.contains(label.trim(), true)
+                            query.labels.split(",").any { qLabel ->
+                                it.label.split(",")
+                                    .map { dataLabel -> dataLabel.trim() }
+                                    .any { dataLabel ->
+                                        dataLabel.equals(qLabel.trim(), true)
+                                    }
                             }
                             )
         }
     }
+
+
     override fun getById(id: String): CashFlow? =
         cashFlows.find { it.id == id }
 
