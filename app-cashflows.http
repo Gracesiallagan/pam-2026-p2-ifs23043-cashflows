@@ -1,6 +1,5 @@
 ## Global Variabel
 @BaseUrl = http://127.0.0.1:8080
-@cashFlowId = 36858750-547c-416c-a260-06024e61b4da
 ## CashFlows: Setup Data
 ## ===========================================
 

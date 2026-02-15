@@ -1,25 +1,37 @@
 package org.delcom.helpers
 
-import org.delcom.data.AppException
-import org.delcom.data.CashFlowRequest
+import org.delcom.data.ValidationException
 
-object ValidatorHelper {
+class ValidatorHelper(
+    private val body: Any?
+) {
+    private val errors = mutableMapOf<String, String>()
 
-    fun validate(request: CashFlowRequest) {
+    private val data: Map<String, Any?> = if (body is Map<*, *>) {
+        @Suppress("UNCHECKED_CAST")
+        body as Map<String, Any?>
+    } else {
+        emptyMap()
+    }
 
-        if (request.type.isBlank())
-            throw AppException("Type tidak boleh kosong")
+    fun required(field: String, message: String) {
+        val value = data[field]
+        if (value == null || (value is String && value.isBlank())) {
+            errors[field] = message
+        }
+    }
 
-        if (request.source.isBlank())
-            throw AppException("Source tidak boleh kosong")
+    fun min(field: String, minValue: Double, message: String) {
+        val value = data[field]
+        // Jika value <= 0 (minValue), maka error
+        if (value is Number && value.toDouble() <= minValue) {
+            errors[field] = message
+        }
+    }
 
-        if (request.label.isBlank())
-            throw AppException("Label tidak boleh kosong")
-
-        if (request.description.isBlank())
-            throw AppException("Description tidak boleh kosong")
-
-        if (request.amount <= 0)
-            throw AppException("Amount harus lebih dari 0")
+    fun validate() {
+        if (errors.isNotEmpty()) {
+            throw ValidationException(errors)
+        }
     }
 }

@@ -1,59 +1,33 @@
 package org.delcom.repositories
 
-import org.delcom.data.CashFlowQuery
 import org.delcom.entities.CashFlow
 
 class CashFlowRepository : ICashFlowRepository {
 
-    private val cashFlows = mutableListOf<CashFlow>()
+    private val db = mutableListOf<CashFlow>()
 
-    override fun getAll(query: CashFlowQuery): List<CashFlow> {
-        return cashFlows.filter {
-
-            (query.type == null || it.type.equals(query.type, true)) &&
-
-                    (query.source == null || it.source.equals(query.source, true)) &&
-
-                    (query.search == null || it.description.contains(query.search, true)) &&
-
-                    (query.gteAmount == null || it.amount >= query.gteAmount) &&
-
-                    (query.lteAmount == null || it.amount <= query.lteAmount) &&
-                    (query.startDate == null || it.createdAt >= query.startDate) &&
-
-                    (query.endDate == null || it.createdAt <= query.endDate) &&
-
-                    (query.labels == null ||
-                            query.labels.split(",").any { qLabel ->
-                                it.label.split(",")
-                                    .map { dataLabel -> dataLabel.trim() }
-                                    .any { dataLabel ->
-                                        dataLabel.equals(qLabel.trim(), true)
-                                    }
-                            }
-                            )
-        }
+    override suspend fun getAll(): List<CashFlow> {
+        return db.toList() // Return copy agar aman
     }
 
-
-    override fun getById(id: String): CashFlow? =
-        cashFlows.find { it.id == id }
-
-    override fun create(cashFlow: CashFlow) {
-        cashFlows.add(cashFlow)
+    override suspend fun getById(id: String): CashFlow? {
+        return db.find { it.id == id }
     }
 
-    override fun delete(id: String) {
-        cashFlows.removeIf { it.id == id }
+    override suspend fun add(cashFlow: CashFlow): Boolean {
+        return db.add(cashFlow)
     }
 
-    override fun clear() {
-        cashFlows.clear()
-    }
-    override fun update(id: String, cashFlow: CashFlow) {
-        val index = cashFlows.indexOfFirst { it.id == id }
+    override suspend fun update(cashFlow: CashFlow): Boolean {
+        val index = db.indexOfFirst { it.id == cashFlow.id }
         if (index != -1) {
-            cashFlows[index] = cashFlow
+            db[index] = cashFlow
+            return true
         }
+        return false
+    }
+
+    override suspend fun delete(id: String): Boolean {
+        return db.removeIf { it.id == id }
     }
 }

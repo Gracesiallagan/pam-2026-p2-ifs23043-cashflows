@@ -8,7 +8,7 @@ data class CashFlow(
     val type: String,
     val source: String,
     val label: String,
-    val amount: Int,
+    val amount: Double,
     val description: String,
     val createdAt: String,
     val updatedAt: String

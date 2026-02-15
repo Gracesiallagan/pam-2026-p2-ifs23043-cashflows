@@ -1,71 +1,37 @@
 package org.delcom
 
 import io.ktor.server.application.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.delcom.data.AppModule
+import io.ktor.server.response.*
+import org.delcom.controllers.CashFlowController
+import org.delcom.data.DataResponse
+import org.koin.ktor.ext.inject
 
 fun Application.configureRouting() {
+    val controller by inject<CashFlowController>()
 
     routing {
-
-        // Root (optional)
         get("/") {
-            call.respondText("Cash Flow API is running")
+            val response = DataResponse<String?>(
+                status = "success",
+                message = "11S23043-Grace Evelin Siallagan-Cashflows",
+                data = null
+            )
+            call.respond(response)
         }
 
         route("/cash-flows") {
+            post("/setup") { controller.setupData(call) }
+            get { controller.getAll(call) }
+            post { controller.create(call) }
 
-            // =============================
-            // SETUP DATA (HARUS DI SINI)
-            // =============================
-            post("/setup") {
-                AppModule.cashFlowController.setupData(call)
-            }
+            get("/types") { controller.getTypes(call) }
+            get("/sources") { controller.getSources(call) }
+            get("/labels") { controller.getLabels(call) }
 
-            // =============================
-            // CRUD
-            // =============================
-
-            // ambil semua data
-            get {
-                AppModule.cashFlowController.getAll(call)
-            }
-
-            // ambil berdasarkan id
-            get("/{id}") {
-                AppModule.cashFlowController.getById(call)
-            }
-
-            // tambah data
-            post {
-                AppModule.cashFlowController.create(call)
-            }
-
-            // update data
-            put("/{id}") {
-                AppModule.cashFlowController.update(call)
-            }
-
-            // hapus data
-            delete("/{id}") {
-                AppModule.cashFlowController.delete(call)
-            }
-
-            // =============================
-            // EXTENDS
-            // =============================
-            get("/types") {
-                AppModule.cashFlowController.getTypes(call)
-            }
-
-            get("/sources") {
-                AppModule.cashFlowController.getSources(call)
-            }
-
-            get("/labels") {
-                AppModule.cashFlowController.getLabels(call)
-            }
+            get("/{id}") { controller.getById(call) }
+            put("/{id}") { controller.update(call) }
+            delete("/{id}") { controller.delete(call) }
         }
     }
 }

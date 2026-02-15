@@ -1,22 +1,21 @@
 package org.delcom.services
 
-import org.delcom.data.CashFlowQuery
 import org.delcom.entities.CashFlow
+import org.delcom.data.CashFlowQuery
 
 interface ICashFlowService {
-    fun getAllCashFlows(query: CashFlowQuery): List<CashFlow>
-    fun getCashFlowById(id: String): CashFlow?
-    fun createRawCashFlow(
-        id: String,
-        type: String,
-        source: String,
-        label: String,
-        amount: Int,
-        description: String,
-        createdAt: String,
-        updatedAt: String
-    )
-    fun removeCashFlow(id: String)
-    fun updateCashFlow(id: String, cashFlow: CashFlow)
-}
+    suspend fun getAllCashFlows(query: CashFlowQuery): List<CashFlow>
+    suspend fun getCashFlowById(id: String): CashFlow?
+    suspend fun createCashFlow(type: String, source: String, label: String, amount: Double, description: String): String
+    suspend fun updateCashFlow(id: String, type: String, source: String, label: String, amount: Double, description: String): Boolean
+    suspend fun removeCashFlow(id: String): Boolean
 
+    suspend fun getAvailableTypes(): List<String>
+    suspend fun getAvailableSources(): List<String>
+    suspend fun getAvailableLabels(): List<String>
+
+    suspend fun createRawCashFlow(
+        id: String, type: String, source: String, label: String,
+        amount: Double, createdAt: String, updatedAt: String, description: String
+    )
+}
