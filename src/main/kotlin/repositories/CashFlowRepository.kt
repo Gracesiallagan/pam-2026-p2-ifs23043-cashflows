@@ -9,12 +9,19 @@ class CashFlowRepository : ICashFlowRepository {
 
     override fun getAll(query: CashFlowQuery): List<CashFlow> {
         return cashFlows.filter {
+
             (query.type == null || it.type.equals(query.type, true)) &&
                     (query.source == null || it.source.equals(query.source, true)) &&
-                    (query.search == null || it.description.contains(query.search, true))
+                    (query.search == null || it.description.contains(query.search, true)) &&
+                    (query.gteAmount == null || it.amount >= query.gteAmount) &&
+                    (query.lteAmount == null || it.amount <= query.lteAmount) &&
+                    (query.labels == null ||
+                            query.labels.split(",").any { label ->
+                                it.label.contains(label.trim(), true)
+                            }
+                            )
         }
     }
-
     override fun getById(id: String): CashFlow? =
         cashFlows.find { it.id == id }
 
@@ -28,5 +35,11 @@ class CashFlowRepository : ICashFlowRepository {
 
     override fun clear() {
         cashFlows.clear()
+    }
+    override fun update(id: String, cashFlow: CashFlow) {
+        val index = cashFlows.indexOfFirst { it.id == id }
+        if (index != -1) {
+            cashFlows[index] = cashFlow
+        }
     }
 }

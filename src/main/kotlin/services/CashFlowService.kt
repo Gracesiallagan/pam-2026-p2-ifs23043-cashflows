@@ -35,4 +35,8 @@ class CashFlowService(
     override fun removeCashFlow(id: String) {
         repository.delete(id)
     }
+    override fun updateCashFlow(id: String, cashFlow: CashFlow) {
+        repository.update(id, cashFlow)
+    }
+
 }

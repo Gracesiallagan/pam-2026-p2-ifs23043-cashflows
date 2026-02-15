@@ -9,4 +9,6 @@ interface ICashFlowRepository {
     fun create(cashFlow: CashFlow)
     fun delete(id: String)
     fun clear()
+    fun update(id: String, cashFlow: CashFlow)
+
 }

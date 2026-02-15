@@ -17,4 +17,6 @@ interface ICashFlowService {
         updatedAt: String
     )
     fun removeCashFlow(id: String)
+    fun updateCashFlow(id: String, cashFlow: CashFlow)
 }
+
