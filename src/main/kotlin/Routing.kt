@@ -12,12 +12,7 @@ fun Application.configureRouting() {
 
     routing {
         get("/") {
-            val response = DataResponse<String?>(
-                status = "success",
-                message = "11S23043-Grace Evelin Siallagan-Cashflows",
-                data = null
-            )
-            call.respond(response)
+            call.respond("11S23043-Grace Evelin Siallagan-Cashflows")
         }
 
         route("/cash-flows") {
