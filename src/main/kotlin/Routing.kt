@@ -10,16 +10,16 @@ fun Application.configureRouting() {
     routing {
 
         // =============================
-        // ROOT (biar tidak 404)
+        // ROOT (optional, biar tidak 404)
         // =============================
         get("/") {
             call.respondText("Cash Flow API is running")
         }
 
         // =============================
-        // SETUP DATA (BISA DIBUKA DARI BROWSER)
+        // SETUP DATA (WAJIB POST)
         // =============================
-        get("/setup") {
+        post("/setup") {
             AppModule.cashFlowController.setupData(call)
         }
 
