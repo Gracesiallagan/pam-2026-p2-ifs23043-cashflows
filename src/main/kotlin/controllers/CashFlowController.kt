@@ -3,8 +3,8 @@ package org.delcom.controllers
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import io.ktor.http.*
 import org.delcom.data.*
-import org.delcom.entities.CashFlow
 import org.delcom.helpers.ValidatorHelper
 import org.delcom.helpers.loadInitialData
 import org.delcom.services.ICashFlowService
@@ -21,13 +21,11 @@ class CashFlowController(
     suspend fun setupData(call: ApplicationCall) {
 
         val existing = cashFlowService.getAllCashFlows(CashFlowQuery())
-
         for (cashFlow in existing) {
             cashFlowService.removeCashFlow(cashFlow.id)
         }
 
         val initCashFlows = loadInitialData()
-
         for (cashFlow in initCashFlows) {
             cashFlowService.createRawCashFlow(
                 cashFlow.id,
@@ -69,10 +67,11 @@ class CashFlowController(
         val result = cashFlowService.getAllCashFlows(query)
 
         call.respond(
-            DataResponse(
-                "success",
-                "Berhasil mengambil data",
-                result
+            HttpStatusCode.OK,
+            mapOf(
+                "status" to "success",
+                "message" to "Berhasil mengambil daftar catatan keuangan",
+                "cashFlows" to result
             )
         )
     }
@@ -103,8 +102,6 @@ class CashFlowController(
     suspend fun create(call: ApplicationCall) {
 
         val body = call.receive<CashFlowRequest>()
-
-        // ✅ VALIDATION
         ValidatorHelper.validate(body)
 
         val id = UUID.randomUUID().toString()
@@ -139,8 +136,6 @@ class CashFlowController(
             ?: throw AppException("Id tidak ditemukan")
 
         val body = call.receive<CashFlowRequest>()
-
-        // ✅ VALIDATION
         ValidatorHelper.validate(body)
 
         val existing = cashFlowService.getCashFlowById(id)
@@ -194,30 +189,51 @@ class CashFlowController(
     // EXTENDS
     // =============================
     suspend fun getTypes(call: ApplicationCall) {
+
         val data = cashFlowService.getAllCashFlows(CashFlowQuery())
             .map { it.type }
             .distinct()
             .sorted()
 
-        call.respond(DataResponse("success", "List types", data))
+        call.respond(
+            DataResponse(
+                "success",
+                "Berhasil mengambil daftar tipe catatan keuangan",
+                data
+            )
+        )
     }
 
     suspend fun getSources(call: ApplicationCall) {
+
         val data = cashFlowService.getAllCashFlows(CashFlowQuery())
             .map { it.source }
             .distinct()
             .sorted()
 
-        call.respond(DataResponse("success", "List sources", data))
+        call.respond(
+            DataResponse(
+                "success",
+                "Berhasil mengambil daftar source catatan keuangan",
+                data
+            )
+        )
     }
 
     suspend fun getLabels(call: ApplicationCall) {
+
         val data = cashFlowService.getAllCashFlows(CashFlowQuery())
             .flatMap { it.label.split(",") }
             .map { it.trim() }
             .distinct()
             .sorted()
 
-        call.respond(DataResponse("success", "List labels", data))
+        call.respond(
+            DataResponse(
+                "success",
+                "Berhasil mengambil daftar label catatan keuangan",
+                data
+            )
+        )
     }
 }
